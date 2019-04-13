@@ -27,7 +27,7 @@ refData = []
 
 def readInData(fileName, storingVar):
     f = open(fileName,'r')
-    
+
     try:
         for line in f:
             storingVar += [line.strip().split(',')]
@@ -45,7 +45,7 @@ def printSystem(inSwarms):
     # counting variables
     i = 1
     j = 1
-    
+
     for sw in inSwarms:
         print ("===========")
         print ("Swarm " + str(i))
@@ -69,7 +69,7 @@ def model(inPos, inPar):
 
     return value
 
-# applies the model to the data and sums the difference between 
+# applies the model to the data and sums the difference between
 def fitFromData(inData,inRefValues,inPar):
 
     # value representing how good the fit is
@@ -80,7 +80,7 @@ def fitFromData(inData,inRefValues,inPar):
         fitVale += ( (model(pos[i],inPar) - refData[i])**2 )
 
     return fitValue
-    
+
 
 """ the solution particle"""
 class SolPart:
@@ -93,7 +93,7 @@ class SolPart:
 
 """ swarm class """
 class Swarm:
-    
+
     def __init__(self, inNumber, inNoParams):
         """number of particles in the swarm"""
         self.number = inNumber
