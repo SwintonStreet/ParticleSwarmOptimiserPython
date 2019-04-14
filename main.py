@@ -88,10 +88,36 @@ def fitFromData(inData,inRefValues,inPar):
     fitValue = 0
 
     for i in range(len(inData)):
-        fitValue += ( (model(inData[i],inPar.param) - inRefValues[i][0])**2 )
+        fitValue += ( (model(inData[i],inPar.param) -
+                       inRefValues[i][0])**2 )
 
     return fitValue
 
+# update particles postion
+def updateParticlePosition(Par):
+    for i in range(len(Par.param)):
+        Par.param[i] += Par.vel[i]
+
+# update particles velocity
+def updateParticleVelocity(Par,bestPar):
+    phi1 = 2.0
+    for i in range(len(Par.param)):
+        Par.vel[i] = Par.vel[i] + (
+                   phi1 * random.uniform(0,1) * (bestPar.param[i] -
+                                                 Par.param[i]))
+
+# updates all the swarm's particle's positions
+def updatePosition(swarms):
+    for sw in swarms:
+        for par in sw.particles:
+            updateParticlePosition(par)
+
+
+# updates all the swarm's particle's velocity
+def updatePosition(swarms):
+    for sw in swarms:
+        for par in sw.particles:
+            updateParticleVelocity(par,sw.bestPar)
 
 """ the solution particle"""
 class SolPart:
