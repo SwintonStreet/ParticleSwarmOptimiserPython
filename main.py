@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import random
 import math
@@ -21,21 +21,32 @@ posData = []
 """ reference data """
 refData = []
 
+""" param min and max data """
+paramData = []
+
 ###############################################################################
 ####                         READING IN DATA                               ####
 ###############################################################################
 
 def readInData(fileName, storingVar):
+    # open file for reading only
     f = open(fileName,'r')
 
     try:
         for line in f:
-            storingVar += [line.strip().split(',')]
+            # get this point's data and convert it to a float
+            pointData = []
+            for val in line.strip().split(','):
+                pointData += [float(val)]
+
+            # add it to the set of data
+            storingVar += [pointData]
     finally:
         f.close()
 
 readInData("PosData.txt",posData)
 readInData("RefData.txt",refData)
+readInData("ParamData.txt",paramData)
 
 ###############################################################################
 ####                              END                                      ####
@@ -77,7 +88,7 @@ def fitFromData(inData,inRefValues,inPar):
     fitValue = 0
 
     for i in range(len(inData)):
-        fitVale += ( (model(pos[i],inPar) - refData[i])**2 )
+        fitValue += ( (model(inData[i],inPar.param) - inRefValues[i][0])**2 )
 
     return fitValue
 
@@ -94,7 +105,12 @@ class SolPart:
 """ swarm class """
 class Swarm:
 
-    def __init__(self, inNumber, inNoParams):
+    def __init__(self,
+                 inNumber,
+                 inNoParams,
+                 inParamData,
+                 inRefData,
+                 inPosData):
         """number of particles in the swarm"""
         self.number = inNumber
 
@@ -104,24 +120,51 @@ class Swarm:
         """ particles initialisation """
         self.particles = []
 
+        """ best fit particle and value for the swarm """
+        self.bestPar = SolPart([],[])
+        self.bestFit = -1
+        bestFit      = -1
+
         for i in range(inNumber):
             tempPar = SolPart([],[])
             for j in range(inNoParams):
-                tempPar.param += [random.uniform(0,1)]
-                tempPar.vel   += [random.uniform(0,1)]
+
+                minVal = inParamData[j][0]
+                maxVal = inParamData[j][1]
+                maxVel = (maxVal - minVal) / 10
+                tempPar.param += [random.uniform(minVal,maxVal)]
+                tempPar.vel   += [random.uniform(0,maxVel)]
             self.particles += [tempPar]
+
+            # we store the best found part
+            parFit = fitFromData(inPosData,inRefData,tempPar)
+            if parFit < bestFit or bestFit < 0 :
+                self.bestFit = parFit
+                self.bestPar = tempPar
+
+
+
 
 
 """all the swarms!"""
 swarms = []
 
-""" Initialise the particles! """
+""" Initialise the swarms and their particles! """
 for i in range(noSwarms):
-    swarms += [Swarm(noPar,noParam)]
+    swarms += [Swarm(noPar,
+                     noParam,
+                     paramData,
+                     refData,
+                     posData)]
 
 #print (len(swarms))
-
-print(swarms[0].particles[0].param)
-
+#print(swarms[0].particles[0].param)
 #printSystem(swarms)
+print(posData)
+print(refData)
+print(paramData)
+
+for i in range(noIt):
+    print (i)
+    i+=1
 
