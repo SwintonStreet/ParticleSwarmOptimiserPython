@@ -81,14 +81,14 @@ def model(inPos, inPar):
     return value
 
 # applies the model to the data and sums the difference between
-def fitFromData(inData,inRefValues,inPar):
+def fitFromData(posData,inRefValues,inPar):
 
     # value representing how good the fit is
     # the smaller the better!
     fitValue = 0
 
-    for i in range(len(inData)):
-        fitValue += ( (model(inData[i],inPar.param) -
+    for i in range(len(posData)):
+        fitValue += ( (model(posData[i],inPar.param) -
                        inRefValues[i][0])**2 )
 
     return fitValue
@@ -108,25 +108,74 @@ def updateParticleVelocity(Par,bestPar):
 
 # updates all the swarm's particle's positions
 def updatePosition(swarms):
+    i = 0
+    j = 0
+    print("Position update")
     for sw in swarms:
+        print("Updating swarm: " + str(i))
+        i += 1
+        j = 0
         for par in sw.particles:
             updateParticlePosition(par)
+            print("Updating particle: " + str(j))
+            print(par.param)
+            j+=1
 
 
 # updates all the swarm's particle's velocity
-def updatePosition(swarms):
+def updateVelocity(swarms):
     for sw in swarms:
         for par in sw.particles:
             updateParticleVelocity(par,sw.bestPar)
 
+# update the fit of each particle and the best particle of the swarm and all the
+# swarms
+def updateSystemFit(swarms,
+                    posData,
+                    refData,
+                    bestOfTheBestPar):
+    for sw in swarms:
+        for par in sw.particles:
+            par.fit = fitFromData(posData, refData, par)
+
+            # if we find the best fit of all the particles
+            # in the swamr then update the swarm to reflect this
+            if par.fit < sw.bestPar.fit :
+                sw.bestPar = par
+
+        # if we have found the best fit of all the swarms then
+        # update it
+        if sw.bestPar.fit < bestOfTheBestPar.fit :
+            bestOfTheBestPar = sw.bestPar
+
+
+
 """ the solution particle"""
 class SolPart:
 
-    def __init__(self, inParam, inVel):
+    def __init__(self,
+                 inParam,
+                 inPosData,
+                 inRefData):
         """ array of parameters being optimised """
-        self.param = inParam
+        self.param = []
         """ array of velocity """
-        self.vel = inVel
+        self.vel   = []
+        """ fit value """
+        self.fit = -1
+
+        for j in range(len(inParam)):
+
+            minVal = inParam[j][0]
+            maxVal = inParam[j][1]
+            maxVel = (maxVal - minVal) / 10
+            self.param += [random.uniform(minVal,maxVal)]
+            self.vel   += [random.uniform(0,maxVel)]
+
+        # we store the best found part
+        self.fit = fitFromData(inPosData,
+                               inRefData,
+                               self)
 
 """ swarm class """
 class Swarm:
@@ -135,8 +184,8 @@ class Swarm:
                  inNumber,
                  inNoParams,
                  inParamData,
-                 inRefData,
-                 inPosData):
+                 inPosData,
+                 inRefData):
         """number of particles in the swarm"""
         self.number = inNumber
 
@@ -147,26 +196,17 @@ class Swarm:
         self.particles = []
 
         """ best fit particle and value for the swarm """
-        self.bestPar = SolPart([],[])
-        self.bestFit = -1
-        bestFit      = -1
+        bestFit = -1
 
         for i in range(inNumber):
-            tempPar = SolPart([],[])
-            for j in range(inNoParams):
-
-                minVal = inParamData[j][0]
-                maxVal = inParamData[j][1]
-                maxVel = (maxVal - minVal) / 10
-                tempPar.param += [random.uniform(minVal,maxVal)]
-                tempPar.vel   += [random.uniform(0,maxVel)]
+            tempPar = SolPart(inParamData,
+                              inPosData,
+                              inRefData)
             self.particles += [tempPar]
 
-            # we store the best found part
-            parFit = fitFromData(inPosData,inRefData,tempPar)
-            if parFit < bestFit or bestFit < 0 :
-                self.bestFit = parFit
+            if tempPar.fit < bestFit or bestFit < 0 :
                 self.bestPar = tempPar
+                bestFit      = tempPar.fit
 
 
 
@@ -180,8 +220,8 @@ for i in range(noSwarms):
     swarms += [Swarm(noPar,
                      noParam,
                      paramData,
-                     refData,
-                     posData)]
+                     posData,
+                     refData)]
 
 #print (len(swarms))
 #print(swarms[0].particles[0].param)
@@ -190,7 +230,20 @@ print(posData)
 print(refData)
 print(paramData)
 
-for i in range(noIt):
-    print (i)
-    i+=1
+
+""" the best solution found of all the swarms """
+bestOfTheBest = SolPart(paramData,
+                        posData,
+                        refData)
+
+# we are ready to perform the iterations to try optimise
+for i in range(1,noIt+1):
+    print("Performing iteration: " + str(i) )
+    updatePosition(swarms)
+    updateVelocity(swarms)
+    updateSystemFit(swarms,
+                    posData,
+                    refData,
+                    bestOfTheBest)
+
 
