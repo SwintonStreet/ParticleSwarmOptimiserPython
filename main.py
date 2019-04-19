@@ -110,15 +110,15 @@ def updateParticleVelocity(Par,bestPar):
 def updatePosition(swarms):
     i = 0
     j = 0
-    print("Position update")
+    #print("Position update")
     for sw in swarms:
-        print("Updating swarm: " + str(i))
+        #print("Updating swarm: " + str(i))
         i += 1
         j = 0
         for par in sw.particles:
             updateParticlePosition(par)
-            print("Updating particle: " + str(j))
-            print(par.param)
+            #print("Updating particle: " + str(j))
+            #print(par.param)
             j+=1
 
 
@@ -226,9 +226,9 @@ for i in range(noSwarms):
 #print (len(swarms))
 #print(swarms[0].particles[0].param)
 #printSystem(swarms)
-print(posData)
-print(refData)
-print(paramData)
+#print(posData)
+#print(refData)
+#print(paramData)
 
 
 """ the best solution found of all the swarms """
@@ -245,5 +245,9 @@ for i in range(1,noIt+1):
                     posData,
                     refData,
                     bestOfTheBest)
+    j = 1
+    for sw in swarms:
+        print ( "best fit for swarm [" + str(j) + "] is [" + str(sw.bestPar.fit) + "]"  )
+        j += 1
 
 

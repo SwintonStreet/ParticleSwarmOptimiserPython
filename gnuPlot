@@ -1,0 +1,14 @@
+set terminal png truecolor
+set output "test.png"
+
+set autoscale
+set xtic auto
+set ytic auto
+
+set xlabel "x"
+set ylabel "y"
+
+set xr[0.0:10.0]
+set yr[3.5:6.5]
+
+plot "xyData.txt" using 1:2 title 'Data Set' with points

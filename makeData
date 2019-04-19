@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# generate the data
+awk 'BEGIN{for (i=0; i<10; i+=0.2) {print i}}' > PosData.txt
+awk '{print (5 + sin($1) + ((rand() - 0.5) * 0.2 ))}' PosData.txt > RefData.txt
+
+# make a side by side version to be able to plot the data
+paste PosData.txt RefData.txt  | expand --tabs=10 > xyData.txt
+
+# make an image
+gnuplot gnuPlot
