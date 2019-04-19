@@ -2,9 +2,10 @@
 
 import random
 import math
+import copy
 
 """number of swarms"""
-noSwarms = 2
+noSwarms = 3
 
 """number of particles per swarm"""
 noPar = 2
@@ -141,12 +142,12 @@ def updateSystemFit(swarms,
             # if we find the best fit of all the particles
             # in the swamr then update the swarm to reflect this
             if par.fit < sw.bestPar.fit :
-                sw.bestPar = par
+                sw.bestPar = copy.deepcopy(par)
 
         # if we have found the best fit of all the swarms then
         # update it
         if sw.bestPar.fit < bestOfTheBestPar.fit :
-            bestOfTheBestPar = sw.bestPar
+            bestOfTheBestPar = copy.deepcopy(sw.bestPar)
 
 
 
