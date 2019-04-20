@@ -11,7 +11,7 @@ noSwarms = 3
 noPar = 2
 
 """number of iterations"""
-noIt = 5
+noIt = 7
 
 """number of params being optimised"""
 noParam = 1
@@ -237,6 +237,9 @@ bestOfTheBest = SolPart(paramData,
                         posData,
                         refData)
 
+# open the output file
+output = open("Output.txt",'w')
+
 # we are ready to perform the iterations to try optimise
 for i in range(1,noIt+1):
     print("Performing iteration: " + str(i) )
@@ -246,9 +249,20 @@ for i in range(1,noIt+1):
                     posData,
                     refData,
                     bestOfTheBest)
+
+    # print out swarm information
     j = 1
     for sw in swarms:
         print ( "best fit for swarm [" + str(j) + "] is [" + str(sw.bestPar.fit) + "]"  )
+        output.write(str(i) + " " +
+                     str(j) + " " +
+                     str(sw.bestPar.fit))
+
+        for pm in sw.bestPar.param:
+             output.write(" " + str(pm))
+
+        output.write("\n")
         j += 1
 
+output.close()
 
