@@ -3,18 +3,56 @@
 import random
 import math
 import copy
+import sys
+
+def help() :
+    print ( "\
+\
+A python implementation of a particle swarm optimisation.\n\
+\n\
+Takes the following mandatory variables,\n\
+\n\
+    -s  <Number of swarms>\n\
+    -sp <Number of particles per swarm>\n\
+    -i  <Number of iterations to use for the simulation>\n\
+    -p  <Number of parameters being optimised>")
+
 
 """number of swarms"""
-noSwarms = 5
+noSwarms = 0
 
 """number of particles per swarm"""
-noPar = 50
+noPar = 0
 
 """number of iterations"""
-noIt = 50
+noIt = 0
 
 """number of params being optimised"""
-noParam = 1
+noParam = 0
+
+# read in values from script
+# start at 1 as 0 is the script name
+i = 1
+while i < len(sys.argv) :
+    if sys.argv[i] == "-s" :
+        noSwarms = int(sys.argv[i+1])
+    elif sys.argv[i] == "-i" :
+        noIt     = int(sys.argv[i+1])
+    elif sys.argv[i] == "-sp" :
+        noPar    = int(sys.argv[i+1])
+    elif sys.argv[i] == "-p" :
+        noParam  = int(sys.argv[i+1])
+    else:
+        print("unrecognised parameter [" + sys.argv[i] + "]")
+    i += 2
+
+# if the mandatory paramters are missing print help and exit
+if  noSwarms == 0 or \
+    noIt     == 0 or \
+    noPar    == 0 or \
+    noParam  == 0 :
+    help()
+    exit()
 
 """ position data  """
 posData = []
@@ -153,6 +191,16 @@ def updateSystemFit(swarms,
         if sw.bestPar.fit < bestOfTheBestPar.fit :
             bestOfTheBestPar = copy.deepcopy(sw.bestPar)
 
+def prettyPrintSys(inIt,
+                   inSw,
+                   inPar,
+                   inParam):
+    print ("System settings:" +
+           "\nIterations          : [" + str(inIt)    + "]" +
+           "\nSwarms              : [" + str(inSw)    + "]" +
+           "\nParticles per swarm : [" + str(inPar)   + "]" +
+           "\nParameters          : [" + str(inParam) + "]")
+
 
 
 """ the solution particle"""
@@ -245,9 +293,23 @@ bestOfTheBest = SolPart(paramData,
 output    = open("Output.txt",'w')
 outputPar = open("OutputPar.txt",'w')
 
+# performing the simulation now
+print("Performing PSO simulation now!")
+prettyPrintSys(noIt,
+               noSwarms,
+               noPar,
+               noParam)
+endChar = ""
+
 # we are ready to perform the iterations to try optimise
 for i in range(1,noIt+1):
-    print("Performing iteration: " + str(i) )
+    scale = int((i/(noIt + 1)) * 51)
+    reverseScale = 50 - scale
+    if i == noIt :
+        endChar = "\n"
+    print("[" + "=" * scale        +
+                " " * reverseScale + "]" +
+                endChar, end="\r" )
     updatePosition(swarms)
     updateVelocity(swarms)
     updateSystemFit(swarms,

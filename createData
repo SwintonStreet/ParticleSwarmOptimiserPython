@@ -3,6 +3,7 @@
 # generate the data
 awk 'BEGIN{for (i=0; i<10; i+=0.2) {print i}}' > PosData.txt
 awk '{print (5 + sin($1) + ((rand() - 0.5) * 0.2 ))}' PosData.txt > RefData.txt
+echo '-20.0,50.0' > ParamData.txt
 
 # make a side by side version to be able to plot the data
 paste PosData.txt RefData.txt  | expand --tabs=10 > xyData.txt
@@ -11,7 +12,10 @@ paste PosData.txt RefData.txt  | expand --tabs=10 > xyData.txt
 gnuplot plotRefData
 
 # run PSO
-./main.py
+./main.py -s  5  \
+          -sp 100 \
+          -i  50 \
+          -p  1
 
 # make image of fit for each swarm
 awk '{outData[$1][$2] = $3} 
