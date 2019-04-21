@@ -1,0 +1,13 @@
+set terminal png truecolor
+set output "SwarmHistory.png"
+
+set autoscale
+set xtic auto
+set ytic auto
+
+set xlabel "x"
+set ylabel "y"
+
+set yr[-20:30]
+
+plot "ParticleHistory.txt" using 1:2 with points lc "red"   ps 1.5 lw 1.5

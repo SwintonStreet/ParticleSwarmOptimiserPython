@@ -1,0 +1,13 @@
+set terminal png truecolor
+set output "SwarmFit.png"
+
+set autoscale
+set xtic auto
+set ytic auto
+
+set xlabel "x"
+set ylabel "y"
+
+plot "SwarmFitPerIteration.txt" using 1:2 title 'Swarm 1' with linespoints lc "red"   ps 1.5 lw 1.5, \
+     "SwarmFitPerIteration.txt" using 1:3 title 'Swarm 2' with linespoints lc "black" ps 1.5 lw 1.5, \
+     "SwarmFitPerIteration.txt" using 1:4 title 'Swarm 3' with linespoints lc "blue"  ps 1.5 lw 1.5

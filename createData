@@ -8,4 +8,44 @@ awk '{print (5 + sin($1) + ((rand() - 0.5) * 0.2 ))}' PosData.txt > RefData.txt
 paste PosData.txt RefData.txt  | expand --tabs=10 > xyData.txt
 
 # make an image
-gnuplot gnuPlot
+gnuplot plotRefData
+
+# run PSO
+./main.py
+
+# make image of fit for each swarm
+awk '{outData[$1][$2] = $3} 
+
+     END{
+            for (it in outData)
+            {
+                printf "%i ", it ;
+                for (sw in outData[it])
+                {
+                    printf "%-12.8f ", sqrt(outData[it][sw])
+                };
+                printf "\n"
+            }
+        }' Output.txt > SwarmFitPerIteration.txt
+
+# make an image of the swarms sqrt(fit) over time
+gnuplot plotSwarmFit
+
+# make image of fit for each swarm
+awk '{outData[$1][$2][$3] = $4} 
+
+     END{
+            for (it in outData)
+            {
+                for (sw in outData[it])
+                {
+                    for (par in outData[it][sw])
+                    {
+                        printf "%4i %-12.8f\n", it, outData[it][sw][par]
+                    }
+                };
+            }
+        }' OutputPar.txt > ParticleHistory.txt
+
+# make an image of the swarms param over time
+gnuplot plotParHistory

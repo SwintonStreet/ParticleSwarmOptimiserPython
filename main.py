@@ -5,13 +5,13 @@ import math
 import copy
 
 """number of swarms"""
-noSwarms = 3
+noSwarms = 5
 
 """number of particles per swarm"""
-noPar = 2
+noPar = 50
 
 """number of iterations"""
-noIt = 7
+noIt = 50
 
 """number of params being optimised"""
 noParam = 1
@@ -67,7 +67,7 @@ def printSystem(inSwarms):
             print ("Parameters")
             for pm in par.param:
                 print (pm)
-            print ("Veloctiy")
+            print ("Velocity")
             for v in par.vel:
                 print (v)
             j += 1
@@ -101,11 +101,15 @@ def updateParticlePosition(Par):
 
 # update particles velocity
 def updateParticleVelocity(Par,bestPar):
-    phi1 = 2.0
+    phi1 = 0.4
     for i in range(len(Par.param)):
         Par.vel[i] = Par.vel[i] + (
                    phi1 * random.uniform(0,1) * (bestPar.param[i] -
                                                  Par.param[i]))
+        if (Par.vel[i] > 1) :
+            Par.vel[i] = 1
+        elif (Par.vel[i] < -1) :
+            Par.vel[i] = -1
 
 # updates all the swarm's particle's positions
 def updatePosition(swarms):
@@ -171,7 +175,7 @@ class SolPart:
             maxVal = inParam[j][1]
             maxVel = (maxVal - minVal) / 10
             self.param += [random.uniform(minVal,maxVal)]
-            self.vel   += [random.uniform(0,maxVel)]
+            self.vel   += [random.uniform(0,maxVel) - (maxVel / 2.0)]
 
         # we store the best found part
         self.fit = fitFromData(inPosData,
@@ -206,7 +210,7 @@ class Swarm:
             self.particles += [tempPar]
 
             if tempPar.fit < bestFit or bestFit < 0 :
-                self.bestPar = tempPar
+                self.bestPar = copy.deepcopy(tempPar)
                 bestFit      = tempPar.fit
 
 
@@ -238,7 +242,8 @@ bestOfTheBest = SolPart(paramData,
                         refData)
 
 # open the output file
-output = open("Output.txt",'w')
+output    = open("Output.txt",'w')
+outputPar = open("OutputPar.txt",'w')
 
 # we are ready to perform the iterations to try optimise
 for i in range(1,noIt+1):
@@ -253,16 +258,26 @@ for i in range(1,noIt+1):
     # print out swarm information
     j = 1
     for sw in swarms:
-        print ( "best fit for swarm [" + str(j) + "] is [" + str(sw.bestPar.fit) + "]"  )
+        #print ( "best fit for swarm [" + str(j) + "] is [" + str(sw.bestPar.fit) + "]"  )
         output.write(str(i) + " " +
                      str(j) + " " +
                      str(sw.bestPar.fit))
 
         for pm in sw.bestPar.param:
-             output.write(" " + str(pm))
+            output.write(" " + str(pm))
+
+        k = 1
+        for Par in sw.particles:
+            for pm in Par.param:
+                outputPar.write(str(i)  + " " +
+                                str(j)  + " " +
+                                str(k)  + " " +
+                                str(pm) + "\n")
+            k += 1
 
         output.write("\n")
         j += 1
 
 output.close()
+outputPar.close()
 
