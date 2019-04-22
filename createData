@@ -17,10 +17,10 @@ paste PosData.txt RefData.txt  | expand --tabs=10 > xyData.txt
 gnuplot plotRefData
 
 # run PSO
-./main.py -s  $noSwarms            \
-          -sp $noParticlesPerSwarm \
-          -i  $noIterations        \
-          -p  $noParams
+./PSO.py -s  $noSwarms            \
+         -sp $noParticlesPerSwarm \
+         -i  $noIterations        \
+         -p  $noParams
 
 # make image of fit for each swarm
 awk '{outData[$1][$2] = $3} 
