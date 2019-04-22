@@ -1,9 +1,14 @@
 #!/bin/bash
 
+noParams=2
+noIterations=100
+noSwarms=5
+noParticlesPerSwarm=100
+
 # generate the data
 awk 'BEGIN{for (i=0; i<10; i+=0.2) {print i}}' > PosData.txt
-awk '{print (5 + sin($1) + ((rand() - 0.5) * 0.2 ))}' PosData.txt > RefData.txt
-echo '-20.0,50.0' > ParamData.txt
+awk '{print (5 + sin($1 + 2) + ((rand() - 0.5) * 0.2 ))}' PosData.txt > RefData.txt
+echo -e "-20.0,50.0\n0.0,10.0" > ParamData.txt
 
 # make a side by side version to be able to plot the data
 paste PosData.txt RefData.txt  | expand --tabs=10 > xyData.txt
@@ -12,10 +17,10 @@ paste PosData.txt RefData.txt  | expand --tabs=10 > xyData.txt
 gnuplot plotRefData
 
 # run PSO
-./main.py -s  5  \
-          -sp 100 \
-          -i  50 \
-          -p  1
+./main.py -s  $noSwarms            \
+          -sp $noParticlesPerSwarm \
+          -i  $noIterations        \
+          -p  $noParams
 
 # make image of fit for each swarm
 awk '{outData[$1][$2] = $3} 
@@ -52,4 +57,16 @@ awk '{outData[$1][$2][$3] = $4}
         }' OutputPar.txt > ParticleHistory.txt
 
 # make an image of the swarms param over time
+sed 's/##/'$noParams'/' plotParHistoryTemplate > plotParHistory
+
+for i in `seq 1 $noParams`
+do
+    col=`echo "$i + 3" | bc`
+
+    echo ""                              >> plotParHistory
+    echo "set title \"Param $i\""        >> plotParHistory
+    echo "unset key"                     >> plotParHistory
+    echo "plot \"OutputPar.txt\" using 1:$col with points lc \"red\" ps 1.5 lw 1.5" >> plotParHistory
+done
+
 gnuplot plotParHistory

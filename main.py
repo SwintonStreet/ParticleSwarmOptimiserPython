@@ -113,9 +113,9 @@ def printSystem(inSwarms):
         j = 1
 
 # The model we are optimising
-def model(inPos, inPar):
+def model(inPos, inParam):
     # the test model is f(x) = n + sin(x) where we are optimising n
-    value = inPar[0] + math.sin(inPos[0])
+    value = inParam[0] + math.sin(inPos[0] + inParam[1])
 
     return value
 
@@ -330,11 +330,13 @@ for i in range(1,noIt+1):
 
         k = 1
         for Par in sw.particles:
+
+            outputPar.write(str(i) + " " +
+                            str(j) + " " +
+                            str(k))
             for pm in Par.param:
-                outputPar.write(str(i)  + " " +
-                                str(j)  + " " +
-                                str(k)  + " " +
-                                str(pm) + "\n")
+                outputPar.write(" " + str(pm))
+            outputPar.write("\n")
             k += 1
 
         output.write("\n")

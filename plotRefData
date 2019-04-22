@@ -1,5 +1,5 @@
 set terminal png truecolor
-set output "test.png"
+set output "SwarmRefData.png"
 
 set autoscale
 set xtic auto
