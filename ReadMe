@@ -1,0 +1,15 @@
+
+A small particle swarm optimiser writen in python
+
+A small bash script is provided that will allow you to try it out. To run the
+test simulation please run
+
+./createData
+
+To make use of the code you must update the model and reference data.
+
+It requires 3 inputs,
+
+* Position data, from which will feed into your model
+* Reference data, this will be used to train your model
+* Param data, this is used to initiate your data and provide max and min velocities
