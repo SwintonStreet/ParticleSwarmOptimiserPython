@@ -138,16 +138,24 @@ def updateParticlePosition(Par):
         Par.param[i] += Par.vel[i]
 
 # update particles velocity
-def updateParticleVelocity(Par,bestPar):
+def updateParticleVelocity(Par,bestPar,curMaxVel):
     phi1 = 0.4
     for i in range(len(Par.param)):
         Par.vel[i] = Par.vel[i] + (
                    phi1 * random.uniform(0,1) * (bestPar.param[i] -
                                                  Par.param[i]))
-        if (Par.vel[i] > 1) :
-            Par.vel[i] = 1
-        elif (Par.vel[i] < -1) :
-            Par.vel[i] = -1
+        if (  Par.vel[i] > curMaxVel[i] ) :
+            Par.vel[i] = curMaxVel[i]
+        elif (Par.vel[i] < curMaxVel[i] ) :
+            Par.vel[i] = -curMaxVel[i]
+
+def updateMaxVel(curMaxVel,
+                 maxVel,
+                 minVel,
+                 it,
+                 noIts):
+    for i in range(len(maxVel)):
+        curMaxVel[i] = abs(maxVel[i] + ((minVel[i] - maxVel[i]) * (it/noIts)))
 
 # updates all the swarm's particle's positions
 def updatePosition(swarms):
@@ -166,10 +174,10 @@ def updatePosition(swarms):
 
 
 # updates all the swarm's particle's velocity
-def updateVelocity(swarms):
+def updateVelocity(swarms,curMaxVel):
     for sw in swarms:
         for par in sw.particles:
-            updateParticleVelocity(par,sw.bestPar)
+            updateParticleVelocity(par,sw.bestPar,curMaxVel)
 
 # update the fit of each particle and the best particle of the swarm and all the
 # swarms
@@ -201,7 +209,17 @@ def prettyPrintSys(inIt,
            "\nParticles per swarm : [" + str(inPar)   + "]" +
            "\nParameters          : [" + str(inParam) + "]")
 
+def prettyPrintProg(i,numberIterations):
 
+    scale = int((i/(numberIterations + 1)) * 51)
+    reverseScale = 50 - scale
+
+    endChar = ""
+    if i == numberIterations :
+        endChar = "\n"
+
+    print("[" + "=" * scale        +
+                " " * reverseScale + "]" + endChar, end="\r" )
 
 """ the solution particle"""
 class SolPart:
@@ -209,7 +227,8 @@ class SolPart:
     def __init__(self,
                  inParam,
                  inPosData,
-                 inRefData):
+                 inRefData,
+                 maxVel):
         """ array of parameters being optimised """
         self.param = []
         """ array of velocity """
@@ -221,9 +240,8 @@ class SolPart:
 
             minVal = inParam[j][0]
             maxVal = inParam[j][1]
-            maxVel = (maxVal - minVal) / 10
             self.param += [random.uniform(minVal,maxVal)]
-            self.vel   += [random.uniform(0,maxVel) - (maxVel / 2.0)]
+            self.vel   += [random.uniform(0,maxVel[j]) - (maxVel[j] / 2.0)]
 
         # we store the best found part
         self.fit = fitFromData(inPosData,
@@ -238,7 +256,8 @@ class Swarm:
                  inNoParams,
                  inParamData,
                  inPosData,
-                 inRefData):
+                 inRefData,
+                 maxVel):
         """number of particles in the swarm"""
         self.number = inNumber
 
@@ -254,19 +273,26 @@ class Swarm:
         for i in range(inNumber):
             tempPar = SolPart(inParamData,
                               inPosData,
-                              inRefData)
+                              inRefData,
+                              maxVel)
             self.particles += [tempPar]
 
             if tempPar.fit < bestFit or bestFit < 0 :
                 self.bestPar = copy.deepcopy(tempPar)
                 bestFit      = tempPar.fit
 
-
-
-
-
 """all the swarms!"""
 swarms = []
+
+# max and min velocity
+maxVel = []
+minVel = []
+
+for param in paramData:
+    maxVel += [abs((param[0] - param[1]) / 10.0 )]
+    minVel += [abs((param[0] - param[1]) / 200.0)]
+
+curMaxVel = copy.deepcopy(maxVel)
 
 """ Initialise the swarms and their particles! """
 for i in range(noSwarms):
@@ -274,20 +300,14 @@ for i in range(noSwarms):
                      noParam,
                      paramData,
                      posData,
-                     refData)]
-
-#print (len(swarms))
-#print(swarms[0].particles[0].param)
-#printSystem(swarms)
-#print(posData)
-#print(refData)
-#print(paramData)
-
+                     refData,
+                     maxVel)]
 
 """ the best solution found of all the swarms """
 bestOfTheBest = SolPart(paramData,
                         posData,
-                        refData)
+                        refData,
+                        maxVel)
 
 # open the output file
 output    = open("Output.txt",'w')
@@ -299,19 +319,12 @@ prettyPrintSys(noIt,
                noSwarms,
                noPar,
                noParam)
-endChar = ""
-
 # we are ready to perform the iterations to try optimise
 for i in range(1,noIt+1):
-    scale = int((i/(noIt + 1)) * 51)
-    reverseScale = 50 - scale
-    if i == noIt :
-        endChar = "\n"
-    print("[" + "=" * scale        +
-                " " * reverseScale + "]" +
-                endChar, end="\r" )
+    prettyPrintProg(i,noIt)
+    updateMaxVel(curMaxVel,maxVel,minVel,i,noIt)
     updatePosition(swarms)
-    updateVelocity(swarms)
+    updateVelocity(swarms,curMaxVel)
     updateSystemFit(swarms,
                     posData,
                     refData,

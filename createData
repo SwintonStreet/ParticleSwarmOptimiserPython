@@ -1,14 +1,14 @@
 #!/bin/bash
 
 noParams=2
-noIterations=100
+noIterations=200
 noSwarms=5
-noParticlesPerSwarm=100
+noParticlesPerSwarm=50
 
 # generate the data
 awk 'BEGIN{for (i=0; i<10; i+=0.2) {print i}}' > PosData.txt
 awk '{print (5 + sin($1 + 2) + ((rand() - 0.5) * 0.2 ))}' PosData.txt > RefData.txt
-echo -e "-20.0,50.0\n0.0,10.0" > ParamData.txt
+echo -e "0.0,10.0\n0.0,10.0" > ParamData.txt
 
 # make a side by side version to be able to plot the data
 paste PosData.txt RefData.txt  | expand --tabs=10 > xyData.txt
